@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Marcador de pontos · SENAI Mapa</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; display: grid; grid-template-columns: 1fr 320px; height: 100vh; }
+  #area { overflow: auto; background: #333; position: relative; }
+  canvas { display: block; cursor: crosshair; }
+  aside { padding: 12px; overflow: auto; border-left: 1px solid #ccc; font-size: 14px; }
+  aside h2 { font-size: 15px; margin: 16px 0 6px; }
+  button, input, select { font: inherit; margin: 2px 0; }
+  .modo button.ativo { background: #0a58ca; color: #fff; }
+  textarea { width: 100%; height: 180px; font: 12px monospace; }
+  small { color: #666; }
+</style>
+</head>
+<body>
+<div id="area"><canvas id="cv"></canvas></div>
+<aside>
+  <h2>1. Imagem</h2>
+  <input type="file" id="img" accept="image/*"><br>
+  <small>Use a ortofoto_reduzida.png (a original trava o navegador).</small>
+
+  <h2>2. Escala</h2>
+  metros_por_pixel: <input id="mpp" type="number" step="0.0001" value="0.1" style="width:90px"><br>
+  <button id="medir">Medir escala (2 cliques)</button>
+
+  <h2>3. Modo</h2>
+  <div class="modo">
+    <button data-m="ponto" class="ativo">Ponto</button>
+    <button data-m="conexao">Conexão</button>
+  </div>
+  <label><input type="checkbox" id="naoAcessivel"> próxima conexão tem escada</label><br>
+  <button id="desfazer">Desfazer último</button>
+  <small><br>Ponto: clique no local. Conexão: clique em dois pontos.</small>
+
+  <h2>4. Importar / exportar</h2>
+  <input type="file" id="json" accept=".json"><br>
+  <button id="exportar">Gerar mapa.json</button>
+  <textarea id="saida" readonly></textarea>
+  <p id="info"></p>
+</aside>
+<script>
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+let img = null, modo = 'ponto', pontos = [], conexoes = [], selecionado = null, historico = [], medindo = [];
+
+const $ = id => document.getElementById(id);
+const perto = (x, y) => pontos.find(p => Math.hypot(p.x - x, p.y - y) < 15);
+
+function desenhar() {
+  if (!img) return;
+  ctx.drawImage(img, 0, 0);
+  ctx.lineWidth = 4;
+  for (const c of conexoes) {
+    const a = pontos.find(p => p.id === c.de), b = pontos.find(p => p.id === c.para);
+    if (!a || !b) continue;
+    ctx.strokeStyle = c.acessivel === false ? '#ff3b30' : '#ffd60a';
+    ctx.setLineDash(c.acessivel === false ? [10, 8] : []);
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  for (const p of pontos) {
+    ctx.fillStyle = p === selecionado ? '#30d158' : (p.tipo === 'bloco' ? '#0a84ff' : '#fff');
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.tipo === 'bloco' ? 12 : 7, 0, 7); ctx.fill();
+    ctx.fillStyle = '#000'; ctx.font = 'bold 16px sans-serif';
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+    ctx.strokeText(p.id, p.x + 14, p.y - 10); ctx.fillText(p.id, p.x + 14, p.y - 10);
+  }
+  $('info').textContent = `${pontos.length} pontos · ${conexoes.length} conexões`;
+}
+
+$('img').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  img = new Image();
+  img.onload = () => { cv.width = img.naturalWidth; cv.height = img.naturalHeight; desenhar(); };
+  img.src = URL.createObjectURL(f);
+};
+
+document.querySelectorAll('.modo button').forEach(b => b.onclick = () => {
+  modo = b.dataset.m; selecionado = null;
+  document.querySelectorAll('.modo button').forEach(x => x.classList.toggle('ativo', x === b));
+  desenhar();
+});
+
+$('medir').onclick = () => { medindo = []; modo = 'medir'; alert('Clique nas duas extremidades de algo com medida conhecida.'); };
+
+cv.onclick = e => {
+  const r = cv.getBoundingClientRect();
+  const x = Math.round((e.clientX - r.left) * cv.width / r.width);
+  const y = Math.round((e.clientY - r.top) * cv.height / r.height);
+
+  if (modo === 'medir') {
+    medindo.push({ x, y });
+    if (medindo.length === 2) {
+      const px = Math.hypot(medindo[1].x - medindo[0].x, medindo[1].y - medindo[0].y);
+      const m = parseFloat(prompt(`${px.toFixed(0)} pixels. Quantos metros isso mede na vida real?`));
+      if (m > 0) $('mpp').value = (m / px).toFixed(4);
+      modo = 'ponto';
+    }
+    return;
+  }
+
+  if (modo === 'ponto') {
+    const id = prompt('ID do ponto (ex.: A, L, P7):'); if (!id) return;
+    if (pontos.some(p => p.id === id.toUpperCase())) return alert('ID já existe.');
+    const bloco = confirm('É um BLOCO (destino)? OK = bloco, Cancelar = passagem');
+    const nome = prompt('Nome:', bloco ? `Bloco ${id.toUpperCase()}` : '') || id;
+    pontos.push({ id: id.toUpperCase(), tipo: bloco ? 'bloco' : 'passagem', nome, x, y });
+    historico.push('p');
+  } else {
+    const p = perto(x, y); if (!p) return;
+    if (!selecionado) selecionado = p;
+    else if (selecionado !== p) {
+      const c = { de: selecionado.id, para: p.id };
+      if ($('naoAcessivel').checked) c.acessivel = false;
+      conexoes.push(c); historico.push('c'); selecionado = null;
+    }
+  }
+  desenhar();
+};
+
+$('desfazer').onclick = () => {
+  const u = historico.pop();
+  if (u === 'p') pontos.pop(); else if (u === 'c') conexoes.pop();
+  desenhar();
+};
+
+$('exportar').onclick = () => {
+  if (!img) return alert('Carregue a imagem primeiro.');
+  const mapa = {
+    imagem: { arquivo: 'ortofoto_reduzida.png', largura: cv.width, altura: cv.height,
+              metros_por_pixel: parseFloat($('mpp').value) },
+    pontos, conexoes
+  };
+  $('saida').value = JSON.stringify(mapa, null, 2);
+  $('saida').select();
+};
+
+$('json').onchange = async e => {
+  const m = JSON.parse(await e.target.files[0].text());
+  pontos = m.pontos || []; conexoes = m.conexoes || []; historico = [];
+  if (m.imagem) $('mpp').value = m.imagem.metros_por_pixel;
+  desenhar();
+};
+</script>
+</body>
+</html>

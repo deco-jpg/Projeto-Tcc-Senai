@@ -1,0 +1,32 @@
+{
+  "_leia_me": "COORDENADAS FICTÍCIAS. Substituir pelas coordenadas reais medidas na ortofoto reduzida. Ver docs/mapeamento.md.",
+  "imagem": {
+    "arquivo": "ortofoto_reduzida.png",
+    "largura": 2000,
+    "altura": 1500,
+    "metros_por_pixel": 0.1
+  },
+  "pontos": [
+    { "id": "A",  "tipo": "bloco",    "nome": "Bloco A", "x": 200,  "y": 300,  "descricao": "Secretaria" },
+    { "id": "B",  "tipo": "bloco",    "nome": "Bloco B", "x": 200,  "y": 900 },
+    { "id": "C",  "tipo": "bloco",    "nome": "Bloco C", "x": 900,  "y": 250 },
+    { "id": "D",  "tipo": "bloco",    "nome": "Bloco D", "x": 900,  "y": 1000 },
+    { "id": "L",  "tipo": "bloco",    "nome": "Bloco L", "x": 1700, "y": 600,  "descricao": "Laboratórios" },
+
+    { "id": "P1", "tipo": "passagem", "nome": "Pátio central",          "x": 450,  "y": 600 },
+    { "id": "P2", "tipo": "passagem", "nome": "Corredor principal",     "x": 900,  "y": 600 },
+    { "id": "P3", "tipo": "passagem", "nome": "Rampa leste",            "x": 1300, "y": 600 },
+    { "id": "P4", "tipo": "passagem", "nome": "Escada do estacionamento", "x": 1300, "y": 300 }
+  ],
+  "conexoes": [
+    { "de": "A",  "para": "P1" },
+    { "de": "B",  "para": "P1" },
+    { "de": "P1", "para": "P2" },
+    { "de": "C",  "para": "P2" },
+    { "de": "D",  "para": "P2" },
+    { "de": "P2", "para": "P3" },
+    { "de": "P3", "para": "L" },
+    { "de": "C",  "para": "P4", "acessivel": false },
+    { "de": "P4", "para": "L",  "acessivel": false }
+  ]
+}
