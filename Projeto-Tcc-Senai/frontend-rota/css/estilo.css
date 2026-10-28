@@ -1,0 +1,233 @@
+/* Front de referência da tela de rota.
+   Cores e fontes são provisórias: substituir pelas do Figma. */
+
+:root {
+  --azul: #0b4f9c;
+  --azul-claro: #e8f0fb;
+  --rota: #1a73e8;
+  --verde: #0f9d58;
+  --vermelho: #d93025;
+  --texto: #1b1f24;
+  --texto-2: #5b6470;
+  --linha: #e3e6ea;
+  --fundo: #ffffff;
+  --fundo-2: #f4f6f8;
+  --sombra: 0 6px 24px rgba(15, 30, 50, .18);
+  --raio: 16px;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--texto);
+  background: #1d2228;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+[hidden] { display: none !important; }
+
+/* ---------------------------------------------------------------- layout */
+
+.app {
+  position: fixed; inset: 0;
+  display: grid;
+  grid-template-rows: 1fr;
+}
+.area-mapa { position: relative; grid-area: 1 / 1; overflow: hidden; }
+
+#mapa {
+  width: 100%; height: 100%; display: block;
+  touch-action: none;            /* gestos tratados em mapa.js */
+  user-select: none;
+  background: #2a3038;
+  cursor: grab;
+}
+#mapa:active { cursor: grabbing; }
+
+/* ----------------------------------------------------------------- topo */
+
+.topo {
+  position: absolute; top: 0; left: 0; right: 0;
+  padding: max(12px, env(safe-area-inset-top)) 16px 0;
+  pointer-events: none;
+}
+.cartao-origem {
+  pointer-events: auto;
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; max-width: 420px;
+  padding: 10px 14px;
+  border: 0; border-radius: var(--raio);
+  background: var(--fundo); box-shadow: var(--sombra);
+  text-align: left;
+}
+.cartao-origem .textos { display: grid; flex: 1; min-width: 0; }
+.cartao-origem small { color: var(--texto-2); font-size: 12px; }
+.cartao-origem strong { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.marca-origem {
+  width: 14px; height: 14px; border-radius: 50%; flex: none;
+  background: var(--verde); box-shadow: 0 0 0 4px rgba(15, 157, 88, .2);
+}
+.seta { width: 22px; height: 22px; fill: none; stroke: var(--texto-2); stroke-width: 2; }
+
+/* ------------------------------------------------------------- controles */
+
+.controles {
+  position: absolute; right: 16px;
+  bottom: calc(var(--altura-painel, 45vh) + 16px);
+  display: grid; gap: 8px;
+}
+.controles button {
+  width: 44px; height: 44px; border: 0; border-radius: 12px;
+  background: var(--fundo); box-shadow: var(--sombra);
+  display: grid; place-items: center;
+}
+.controles svg { width: 22px; height: 22px; fill: none; stroke: var(--texto); stroke-width: 2; stroke-linecap: round; }
+
+/* ---------------------------------------------------------------- painel */
+
+.painel {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  max-height: 48vh; overflow-y: auto;
+  padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+  background: var(--fundo);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 24px rgba(15, 30, 50, .18);
+}
+.alca { width: 40px; height: 4px; border-radius: 2px; background: var(--linha); margin: 0 auto 10px; }
+.painel h1 { font-size: 20px; margin: 4px 0 12px; }
+
+.busca {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px; border-radius: 12px; background: var(--fundo-2);
+}
+.busca svg { width: 20px; height: 20px; fill: none; stroke: var(--texto-2); stroke-width: 2; flex: none; }
+.busca input {
+  flex: 1; border: 0; background: none; padding: 12px 0; font-size: 16px; outline: none; min-width: 0;
+}
+
+/* chave liga/desliga */
+.chave { display: flex; align-items: center; gap: 10px; margin: 12px 0 4px; font-size: 14px; cursor: pointer; }
+.chave input { position: absolute; opacity: 0; pointer-events: none; }
+.chave .trilho {
+  width: 40px; height: 24px; border-radius: 12px; background: #c9ced5; position: relative; flex: none;
+  transition: background .2s;
+}
+.chave .trilho::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .2s;
+}
+.chave input:checked + .trilho { background: var(--azul); }
+.chave input:checked + .trilho::after { transform: translateX(16px); }
+.chave input:focus-visible + .trilho { outline: 2px solid var(--azul); outline-offset: 2px; }
+
+/* lista de destinos */
+.lista h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-2); margin: 16px 0 8px; }
+.itens { display: flex; flex-wrap: wrap; gap: 8px; }
+.item {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border: 1px solid var(--linha); border-radius: 999px; background: var(--fundo);
+  font-size: 14px;
+}
+.item:hover, .item:focus-visible { border-color: var(--azul); background: var(--azul-claro); outline: none; }
+.itens.bloco .item { padding: 6px 12px 6px 6px; }
+.itens.bloco .item span:last-child:empty { display: none; }
+.letra {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--azul); color: #fff; font-weight: 700; font-size: 14px;
+}
+.vazio, .dica { color: var(--texto-2); font-size: 13px; }
+.dica { margin: 14px 0 0; }
+
+/* resultado da rota */
+.resumo { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.resumo small { color: var(--texto-2); font-size: 12px; }
+.resumo h2 { margin: 2px 0 0; font-size: 22px; }
+.secundario {
+  border: 1px solid var(--linha); background: var(--fundo); border-radius: 10px; padding: 8px 14px; font-weight: 600;
+}
+.metricas { display: flex; gap: 10px; margin: 14px 0; }
+.metricas > div {
+  flex: 1; display: grid; justify-items: center; padding: 10px 6px; border-radius: 12px; background: var(--fundo-2);
+}
+.metricas strong { font-size: 22px; color: var(--azul); }
+.metricas small { color: var(--texto-2); font-size: 12px; }
+
+.passos { list-style: none; margin: 0; padding: 0 0 0 4px; }
+.passos li {
+  position: relative; display: flex; justify-content: space-between; gap: 12px;
+  padding: 8px 0 8px 24px; font-size: 15px;
+}
+.passos li::before {          /* bolinha */
+  content: ""; position: absolute; left: 0; top: 13px; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--fundo); border: 2px solid var(--rota);
+}
+.passos li:not(:last-child)::after {   /* linha ligando os passos */
+  content: ""; position: absolute; left: 6px; top: 25px; bottom: -13px; width: 2px; background: var(--rota); opacity: .35;
+}
+.passos li.inicio::before { background: var(--verde); border-color: var(--verde); }
+.passos li.fim::before { background: var(--vermelho); border-color: var(--vermelho); }
+.passos li.fim { font-weight: 600; }
+.passos small { color: var(--texto-2); white-space: nowrap; }
+
+.carregando { padding: 12px 0; color: var(--texto-2); }
+.erro {
+  margin: 12px 0 0; padding: 12px; border-radius: 12px;
+  background: #fdecea; color: #8c1d18; font-size: 14px;
+}
+
+/* ---------------------------------------------------------------- diálogo */
+
+dialog {
+  width: min(520px, calc(100vw - 32px)); max-height: 80vh;
+  border: 0; border-radius: var(--raio); padding: 16px; box-shadow: var(--sombra);
+}
+dialog::backdrop { background: rgba(10, 15, 20, .55); }
+.dlg-topo { display: flex; justify-content: space-between; align-items: center; }
+.dlg-topo h2 { margin: 0; font-size: 20px; }
+.fechar { border: 0; background: none; font-size: 28px; line-height: 1; padding: 4px 8px; }
+
+/* ------------------------------------------------------------ SVG do mapa */
+
+.rota-borda { stroke: #fff; stroke-width: 12; opacity: .9; }
+.rota-linha { stroke: var(--rota); stroke-width: 7; }
+
+.destino { cursor: pointer; }
+.destino.bloco circle { fill: var(--azul); stroke: #fff; stroke-width: 2.5; }
+.destino.bloco text {
+  fill: #fff; font: 700 13px system-ui, sans-serif; text-anchor: middle; pointer-events: none;
+}
+.destino.local circle { fill: #f6a800; stroke: #fff; stroke-width: 2; }
+.destino .rotulo {
+  fill: #fff; font: 600 12px system-ui, sans-serif;
+  paint-order: stroke; stroke: rgba(0,0,0,.75); stroke-width: 3px; stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.origem .miolo { fill: var(--verde); stroke: #fff; stroke-width: 3; }
+.origem .pulso { fill: var(--verde); opacity: .25; transform-box: fill-box; transform-origin: center; animation: pulso 1.8s ease-out infinite; }
+@keyframes pulso { from { transform: scale(.5); opacity: .5; } to { transform: scale(1.4); opacity: 0; } }
+
+.chegada path { fill: var(--vermelho); stroke: #fff; stroke-width: 2; }
+.chegada .furo { fill: #fff; }
+.caminhante circle { fill: #fff; stroke: var(--rota); stroke-width: 3.5; }
+
+/* ------------------------------------------------------------ computador */
+
+@media (min-width: 900px) {
+  .app { grid-template-columns: 380px 1fr; }
+  .area-mapa { grid-area: 1 / 2; }
+  .painel {
+    position: relative; grid-area: 1 / 1;
+    max-height: none; height: 100%; border-radius: 0;
+    padding: 24px; box-shadow: 2px 0 16px rgba(15, 30, 50, .12); z-index: 1;
+  }
+  .alca { display: none; }
+  .controles { bottom: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .origem .pulso { animation: none; }
+}
