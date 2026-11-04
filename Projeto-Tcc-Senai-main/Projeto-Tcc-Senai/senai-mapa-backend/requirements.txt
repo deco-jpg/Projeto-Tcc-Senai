@@ -1,0 +1,15 @@
+# Versões FIXAS (==): todo mundo da equipe instala exatamente o mesmo conjunto,
+# e o projeto não quebra sozinho quando sai uma versão nova de alguma biblioteca.
+# Testado com Python 3.14. O código exige Python 3.10 ou mais novo.
+# Para atualizar: subir a versão aqui, rodar `pytest` e só então commitar.
+fastapi==0.153.0
+starlette==1.9.0
+uvicorn[standard]==0.54.0
+pydantic==2.14.1
+pydantic-settings==2.16.1
+qrcode[pil]==8.2
+Pillow==13.0.0
+
+# desenvolvimento
+pytest==9.1.1
+httpx==0.28.1

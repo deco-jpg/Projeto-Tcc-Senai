@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b4f9c">
+  <title>Rotas do Campus - SENAI</title>
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+  <main class="app">
+
+    <!-- MAPA: o SVG recebe a ortofoto e a rota (ver js/mapa.js) -->
+    <div class="area-mapa">
+      <svg id="mapa" role="img" aria-label="Mapa do campus"></svg>
+
+      <header class="topo" id="topo">
+        <button class="cartao-origem" id="btn-origem" type="button" aria-haspopup="dialog">
+          <span class="marca-origem" aria-hidden="true"></span>
+          <span class="textos">
+            <small>Você está em</small>
+            <strong id="nome-origem">Escolha onde você está</strong>
+          </span>
+          <svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
+        </button>
+      </header>
+
+      <div class="controles" aria-label="Controles do mapa">
+        <button id="btn-rota" type="button" title="Centralizar rota" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="7"/></svg>
+        </button>
+        <button id="btn-tudo" type="button" title="Ver o campus inteiro">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- PAINEL: escolha do destino e resultado da rota -->
+    <section class="painel" id="painel" aria-live="polite">
+      <div class="alca" aria-hidden="true"></div>
+
+      <div id="tela-escolha">
+        <h1>Para onde você vai?</h1>
+        <div class="busca">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
+          <input id="busca" type="search" placeholder="Buscar bloco ou local" autocomplete="off">
+        </div>
+        <label class="chave">
+          <input type="checkbox" id="acessivel">
+          <span class="trilho" aria-hidden="true"></span>
+          Rota acessível (evitar escadas)
+        </label>
+        <div id="lista-destinos" class="lista"></div>
+        <p class="dica">Dica: você também pode tocar num bloco no mapa.</p>
+      </div>
+
+      <div id="tela-rota" hidden>
+        <div class="resumo">
+          <div>
+            <small>Indo para</small>
+            <h2 id="rota-destino"></h2>
+          </div>
+          <button id="btn-trocar" type="button" class="secundario">Trocar</button>
+        </div>
+        <div class="metricas">
+          <div><strong id="rota-tempo">-</strong><small>min a pé</small></div>
+          <div><strong id="rota-dist">-</strong><small>metros</small></div>
+          <div id="selo-acessivel" hidden><strong>♿</strong><small>acessível</small></div>
+        </div>
+        <ol id="passos" class="passos"></ol>
+      </div>
+
+      <div id="carregando" class="carregando" hidden>Calculando rota…</div>
+      <p id="erro" class="erro" role="alert" hidden></p>
+    </section>
+
+    <!-- Escolha manual da origem (quando não veio QR code ou para trocar) -->
+    <dialog id="dlg-origem" aria-labelledby="titulo-origem">
+      <form method="dialog" class="dlg-topo">
+        <h2 id="titulo-origem">Onde você está?</h2>
+        <button value="fechar" class="fechar" aria-label="Fechar">×</button>
+      </form>
+      <div id="lista-origens" class="lista"></div>
+    </dialog>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
