@@ -4,8 +4,7 @@
  * API_BASE vazio = mesma origem (front servido pela própria API em "/").
  * Se o front rodar separado (Vite, React...), troque para "http://IP:8000".
  */
-export const API_BASE = window.API_BASE ?? "";
-
+export const API_BASE = "https://projeto-tcc-senai-f73v.vercel.app";
 /** Erro com mensagem já pronta para mostrar ao usuário. */
 export class ErroApi extends Error {
   constructor(status, mensagem) {
