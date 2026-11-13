@@ -39,7 +39,7 @@
 
     <!-- PAINEL: escolha do destino e resultado da rota -->
     <section class="painel" id="painel" aria-live="polite">
-      <div class="alca" aria-hidden="true"></div>
+      <button id="btn-alca" class="alca" type="button" aria-expanded="true" aria-label="Recolher detalhes da rota" disabled></button>
 
       <!-- H1: feedback visível enquanto a rota é calculada (fica no topo para não sair da tela) -->
       <div id="carregando" class="carregando" hidden><span class="giro" aria-hidden="true"></span>Calculando rota…</div>
@@ -77,6 +77,7 @@
           </div>
           <button id="btn-trocar" type="button" class="secundario">Trocar destino</button>
         </div>
+        <button id="resumo-curto" class="resumo-curto" type="button"></button>
         <div class="metricas">
           <div><strong id="rota-tempo">-</strong><small>min a pé</small></div>
           <div><strong id="rota-dist">-</strong><small>metros</small></div>

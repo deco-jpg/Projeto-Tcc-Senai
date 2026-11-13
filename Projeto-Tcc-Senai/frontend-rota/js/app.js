@@ -25,7 +25,8 @@ const estado = {
   rota: null, // GET /rotas
   empurrou: false, // true se a tela de rota criou uma entrada no histórico (H3)
   pedido: 0, // número do último pedido de rota (descarta respostas antigas)
-  emAndamento: null, // chave do pedido em andamento (evita toques repetidos)
+  emAndamento: null,
+  recolhido: false,// chave do pedido em andamento (evita toques repetidos)
 };
 
 const CHAVE_RECENTES = "senaiway_recentes";
@@ -180,6 +181,9 @@ function mostrarTelaRota() {
   $("rota-destino").textContent = acharDestino(r.destino).nome;
   $("rota-tempo").textContent = Math.max(1, Math.round(r.tempo_estimado_min));
   $("rota-dist").textContent = Math.round(r.distancia_m);
+    $("btn-alca").disabled = false;
+  $("resumo-curto").innerHTML =
+    `<strong>${$("rota-tempo").textContent} min a pé · ${$("rota-dist").textContent} m</strong><span>Ver passos ▴</span>`;
   $("selo-acessivel").hidden = !$("acessivel").checked;
 
   const passos = r.passos?.length ? r.passos.map((t) => ({ texto: t })) : passosAPartirDosPontos(r);
@@ -231,6 +235,8 @@ function voltarParaEscolha() {
   estado.destino = null;
   estado.rota = null;
   estado.empurrou = false;
+  definirRecolhido(false);
+  $("btn-alca").disabled = true;
   estado.mapa.limparRota();
   definirOcupado(false);
   esconderErro();
@@ -250,6 +256,21 @@ function trocarDestino() {
   } else {
     voltarParaEscolha();
   }
+}
+// ------------------------------------------------- painel recolhível (celular)
+
+const ehCelular = () => !matchMedia("(min-width: 900px)").matches;
+
+/** Abaixa (true) ou levanta (false) o painel da rota, para ver mais do mapa. */
+function definirRecolhido(recolher) {
+  if (recolher && (!ehCelular() || $("tela-rota").hidden)) return;
+  estado.recolhido = recolher;
+  $("painel").classList.toggle("recolhido", recolher);
+  const alca = $("btn-alca");
+  alca.setAttribute("aria-expanded", String(!recolher));
+  alca.setAttribute("aria-label", recolher ? "Mostrar detalhes da rota" : "Recolher detalhes da rota");
+  // o painel mudou de altura: enquadra a rota de novo usando a área livre do mapa
+  if (estado.rota) requestAnimationFrame(() => estado.mapa.enquadrar(estado.rota.pontos, folgas()));
 }
 
 // ---------------------------------------------------------------- recentes (H6)
@@ -417,6 +438,27 @@ $("btn-compartilhar").addEventListener("click", compartilhar);
 $("btn-tudo").addEventListener("click", () => estado.mapa?.verTudo());
 $("btn-rota").addEventListener("click", () =>
   estado.rota && estado.mapa.enquadrar(estado.rota.pontos, folgas()));
+
+// Alça do painel: arrastar para baixo recolhe, para cima expande, um toque alterna.
+let inicioY = null;
+$("btn-alca").addEventListener("pointerdown", (e) => {
+  inicioY = e.clientY;
+  $("btn-alca").setPointerCapture(e.pointerId);
+});
+$("btn-alca").addEventListener("pointerup", (e) => {
+  if (inicioY === null) return;
+  const dy = e.clientY - inicioY;
+  inicioY = null;
+  if (dy > 30) definirRecolhido(true);
+  else if (dy < -30) definirRecolhido(false);
+  else definirRecolhido(!estado.recolhido);
+});
+$("btn-alca").addEventListener("pointercancel", () => (inicioY = null));
+// teclado (Enter/Espaço): o clique não vem de um toque, então alterna aqui
+$("btn-alca").addEventListener("click", (e) => {
+  if (e.detail === 0) definirRecolhido(!estado.recolhido);
+});
+$("resumo-curto").addEventListener("click", () => definirRecolhido(false));
 
 // H3: botão "voltar" / "avançar" do celular acompanha a tela
 window.addEventListener("popstate", () => {

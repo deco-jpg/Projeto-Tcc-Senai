@@ -275,3 +275,39 @@ dialog::backdrop { background: rgba(10, 15, 20, .55); }
 @media (prefers-reduced-motion: reduce) {
   .giro { animation: none; }
 }
+
+
+/* =====================================================================
+   Painel da rota recolhível (só no celular)
+   Cole este bloco no FINAL de css/estilo.css
+   ===================================================================== */
+.resumo-curto { display: none; }
+
+@media (max-width: 899px) {
+  /* a alça vira um botão com área de toque maior */
+  .alca {
+    display: block; width: 100%; height: 30px; margin: -6px 0 0; padding: 0;
+    border: 0; background: none; touch-action: none; cursor: pointer;
+  }
+  .alca::before {
+    content: ""; display: block; width: 44px; height: 5px; margin: 12px auto 0;
+    border-radius: 3px; background: #c4cad2;
+  }
+  .alca:disabled { pointer-events: none; }
+  .alca:focus-visible { outline: 2px solid var(--azul); outline-offset: -2px; border-radius: 8px; }
+
+  /* painel abaixado: só o destino e o resumo, o resto do mapa fica livre */
+  .painel.recolhido { max-height: none; overflow: hidden; }
+  .painel.recolhido .metricas,
+  .painel.recolhido .passos,
+  .painel.recolhido #btn-compartilhar,
+  .painel.recolhido .aviso { display: none; }
+  .painel.recolhido .resumo h2 { font-size: 18px; }
+  .painel.recolhido .resumo-curto {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    width: 100%; margin: 6px 0 4px; padding: 10px 12px;
+    border: 0; border-radius: 12px; background: var(--fundo-2); text-align: left;
+  }
+  .painel.recolhido .resumo-curto strong { color: var(--azul); }
+  .painel.recolhido .resumo-curto span { color: var(--texto-2); font-size: 13px; white-space: nowrap; }
+}
