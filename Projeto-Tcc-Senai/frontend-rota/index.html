@@ -23,6 +23,8 @@
           </span>
           <svg class="seta" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
         </button>
+        <!-- H10: ajuda sempre à mão -->
+        <button class="ajuda" id="btn-ajuda" type="button" aria-haspopup="dialog" aria-label="Ajuda: como usar">?</button>
       </header>
 
       <div class="controles" aria-label="Controles do mapa">
@@ -37,19 +39,32 @@
 
     <!-- PAINEL: escolha do destino e resultado da rota -->
     <section class="painel" id="painel" aria-live="polite">
-      <div class="alca" aria-hidden="true"></div>
+      <button id="btn-alca" class="alca" type="button" aria-expanded="true" aria-label="Recolher detalhes da rota" disabled></button>
+
+      <!-- H1: feedback visível enquanto a rota é calculada (fica no topo para não sair da tela) -->
+      <div id="carregando" class="carregando" hidden><span class="giro" aria-hidden="true"></span>Calculando rota…</div>
+      <!-- H9: erro em linguagem simples, com uma ação para resolver -->
+      <div id="erro" class="erro" role="alert" hidden>
+        <p id="erro-texto"></p>
+        <button id="erro-acao" type="button" class="secundario" hidden></button>
+      </div>
 
       <div id="tela-escolha">
         <h1>Para onde você vai?</h1>
         <div class="busca">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
-          <input id="busca" type="search" placeholder="Buscar bloco ou local" autocomplete="off">
+          <input id="busca" type="search" placeholder="Buscar bloco ou local" autocomplete="off" enterkeyhint="go">
         </div>
         <label class="chave">
           <input type="checkbox" id="acessivel">
           <span class="trilho" aria-hidden="true"></span>
           Rota acessível (evitar escadas)
         </label>
+        <!-- H6: destinos usados recentemente (preenchido em js/app.js) -->
+        <div id="recentes" class="lista" hidden>
+          <h3>Recentes</h3>
+          <div id="lista-recentes" class="itens"></div>
+        </div>
         <div id="lista-destinos" class="lista"></div>
         <p class="dica">Dica: você também pode tocar num bloco no mapa.</p>
       </div>
@@ -60,18 +75,19 @@
             <small>Indo para</small>
             <h2 id="rota-destino"></h2>
           </div>
-          <button id="btn-trocar" type="button" class="secundario">Trocar</button>
+          <button id="btn-trocar" type="button" class="secundario">Trocar destino</button>
         </div>
+        <button id="resumo-curto" class="resumo-curto" type="button"></button>
         <div class="metricas">
           <div><strong id="rota-tempo">-</strong><small>min a pé</small></div>
           <div><strong id="rota-dist">-</strong><small>metros</small></div>
           <div id="selo-acessivel" hidden><strong>♿</strong><small>acessível</small></div>
         </div>
         <ol id="passos" class="passos"></ol>
+        <!-- H7: atalho para enviar a rota a outra pessoa -->
+        <button id="btn-compartilhar" type="button" class="secundario largo">Compartilhar esta rota</button>
+        <p id="aviso" class="aviso" role="status" hidden></p>
       </div>
-
-      <div id="carregando" class="carregando" hidden>Calculando rota…</div>
-      <p id="erro" class="erro" role="alert" hidden></p>
     </section>
 
     <!-- Escolha manual da origem (quando não veio QR code ou para trocar) -->
@@ -80,7 +96,23 @@
         <h2 id="titulo-origem">Onde você está?</h2>
         <button value="fechar" class="fechar" aria-label="Fechar">×</button>
       </form>
+      <p id="aviso-origem" class="aviso-dlg" role="alert" hidden></p>
       <div id="lista-origens" class="lista"></div>
+    </dialog>
+
+    <!-- H10: ajuda curta e focada na tarefa -->
+    <dialog id="dlg-ajuda" aria-labelledby="titulo-ajuda">
+      <form method="dialog" class="dlg-topo">
+        <h2 id="titulo-ajuda">Como usar</h2>
+        <button value="fechar" class="fechar" aria-label="Fechar">×</button>
+      </form>
+      <ol class="ajuda-lista">
+        <li><strong>Diga onde você está.</strong> Escaneie o QR Code do bloco ou toque no cartão “Você está em”.</li>
+        <li><strong>Escolha o destino.</strong> Use a busca, a lista ou toque num bloco no mapa.</li>
+        <li><strong>Siga a linha azul.</strong> Os passos mostram o caminho e a distância de cada trecho.</li>
+        <li><strong>Rota acessível</strong> evita trechos com escada.</li>
+        <li><strong>Errou o destino?</strong> Toque em “Trocar destino” ou use o botão voltar do celular.</li>
+      </ol>
     </dialog>
   </main>
 
