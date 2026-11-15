@@ -4,8 +4,11 @@
  * API_BASE vazio = mesma origem (front servido pela própria API em "/").
  * Se o front rodar separado (Vite, React...), troque para "http://IP:8000".
  */
-export const API_BASE = "https://projeto-tcc-senai-f73v.vercel.app";
-
+export const API_BASE =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+    ? ""
+    : "https://projeto-tcc-senai-f73v.vercel.app";
 /** Erro com mensagem já pronta para mostrar ao usuário. */
 export class ErroApi extends Error {
   constructor(status, mensagem) {
@@ -14,24 +17,21 @@ export class ErroApi extends Error {
   }
 }
 
-// Heurísticas 2 e 9: mensagens em linguagem simples, dizendo o que fazer.
 const MENSAGENS = {
-  404: "Não encontramos esse local no mapa. Escolha outro destino.",
+  404: "Esse local não existe no mapa.",
   422: "Não existe caminho entre esses dois pontos.",
+  501: "Essa função ainda não foi implementada no back-end.",
 };
-const MENSAGEM_SERVIDOR = "O sistema teve um problema agora. Tente de novo em instantes.";
-const MENSAGEM_OUTRO = "Não foi possível concluir a ação. Tente de novo.";
 
 async function get(caminho) {
   let resp;
   try {
     resp = await fetch(API_BASE + caminho);
   } catch {
-    throw new ErroApi(0, "Sem conexão com o servidor. Verifique sua internet e tente de novo.");
+    throw new ErroApi(0, "Sem conexão com o servidor. Verifique a rede.");
   }
   if (!resp.ok) {
-    const mensagem = MENSAGENS[resp.status] ?? (resp.status >= 500 ? MENSAGEM_SERVIDOR : MENSAGEM_OUTRO);
-    throw new ErroApi(resp.status, mensagem);
+    throw new ErroApi(resp.status, MENSAGENS[resp.status] ?? `Erro ${resp.status} no servidor.`);
   }
   return resp.json();
 }
